@@ -2,7 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
       <title>Temperature Sensor Selection Guide | IEC 60751 & IEC 60584</title>
       <style>
          * {
@@ -15,9 +15,11 @@
          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
          min-height: 100vh;
          padding: 20px;
+         overflow-x: hidden;
          }
          .container {
          max-width: 1400px;
+         width: 100%;
          margin: 0 auto;
          background: white;
          border-radius: 15px;
@@ -42,9 +44,12 @@
          display: flex;
          background: #f5f5f5;
          border-bottom: 3px solid #667eea;
+         overflow-x: auto;
+         -webkit-overflow-scrolling: touch;
          }
          .tab {
          flex: 1;
+         min-width: 120px;
          padding: 20px;
          text-align: center;
          cursor: pointer;
@@ -53,6 +58,7 @@
          border: none;
          background: transparent;
          font-size: 1.1em;
+         white-space: nowrap;
          }
          .tab:hover {
          background: #e0e0e0;
@@ -132,6 +138,7 @@
          font-weight: bold;
          cursor: pointer;
          transition: transform 0.2s, box-shadow 0.2s;
+         width: 100%;
          }
          .btn:hover {
          transform: translateY(-2px);
@@ -168,12 +175,15 @@
          width: 100%;
          border-collapse: collapse;
          margin-top: 15px;
+         overflow-x: auto;
+         display: block;
          }
          th,
          td {
          padding: 12px;
          text-align: left;
          border-bottom: 1px solid #ddd;
+         min-width: 100px;
          }
          th {
          background: #667eea;
@@ -260,6 +270,105 @@
          .checkbox-item input {
          width: auto;
          margin-right: 8px;
+         }
+
+         /* MOBILE RESPONSIVE STYLES */
+         @media (max-width: 768px) {
+            body {
+               padding: 10px;
+            }
+            
+            header h1 {
+               font-size: 1.8em;
+            }
+            
+            header p {
+               font-size: 0.95em;
+            }
+            
+            .tabs {
+               flex-wrap: nowrap;
+               overflow-x: scroll;
+            }
+            
+            .tab {
+               font-size: 0.9em;
+               padding: 15px 10px;
+               min-width: 100px;
+            }
+            
+            .tab-content {
+               padding: 15px;
+            }
+            
+            .section {
+               padding: 15px;
+               margin-bottom: 20px;
+            }
+            
+            .section h2 {
+               font-size: 1.4em;
+               flex-wrap: wrap;
+            }
+            
+            .results h3 {
+               font-size: 1.3em;
+            }
+            
+            .comparison-grid {
+               grid-template-columns: 1fr;
+            }
+            
+            .checkbox-group {
+               grid-template-columns: 1fr;
+            }
+            
+            table {
+               font-size: 0.85em;
+            }
+            
+            th, td {
+               padding: 8px;
+               min-width: 80px;
+            }
+            
+            .btn {
+               padding: 12px 20px;
+               font-size: 1em;
+            }
+            
+            .spec-card, .sensor-card {
+               padding: 15px;
+            }
+            
+            footer {
+               font-size: 0.9em;
+               padding: 15px 10px;
+            }
+         }
+
+         @media (max-width: 480px) {
+            header h1 {
+               font-size: 1.5em;
+            }
+            
+            .tab {
+               font-size: 0.8em;
+               padding: 12px 8px;
+            }
+            
+            .section h2 {
+               font-size: 1.2em;
+            }
+            
+            table {
+               font-size: 0.75em;
+            }
+            
+            th, td {
+               padding: 6px;
+               min-width: 60px;
+            }
          }
       </style>
    </head>
@@ -911,7 +1020,6 @@
          
          function displayRecommendations(recommendations) {
              const resultsDiv = document.getElementById('wizardResults');
-         
              let html = '<h3>📋 Recommended Sensors (Ranked by Suitability)</h3>';
          
              recommendations.forEach((rec, index) => {
@@ -988,6 +1096,8 @@
                      <option value="T2">Type T - Class 2</option>
                      <option value="E1">Type E - Class 1</option>
                      <option value="E2">Type E - Class 2</option>
+                     <option value="N1">Type N - Class 1</option>
+                     <option value="N2">Type N - Class 2</option>
                  `;
              }
          }
@@ -1018,29 +1128,26 @@
                          formula = '±(0.6 + 0.01|t|)';
                          break;
                  }
-             } else {
-                 if (type === 'tc') {
-                     const t = Math.abs(temp);
+             } else if (type === 'tc') {
+                 const t = Math.abs(temp);
          
-                     if (tolClass === 'T1') {
-                         // Type T Class 1: ±0.5°C or ±0.004|t|
-                         tolerance = Math.max(0.5, 0.004 * t);
-                         formula = '±0.5°C or ±0.004|t| (greater)  [Type T Class 1, IEC 60584-1 Table 12]';
-                     } else if (tolClass === 'T2') {
-                         // Type T Class 2: ±1.0°C or ±0.0075|t|
-                         tolerance = Math.max(1.0, 0.0075 * t);
-                         formula = '±1.0°C or ±0.0075|t| (greater)  [Type T Class 2, IEC 60584-1 Table 12]';
-                     } else if (tolClass === 'K1' || tolClass === 'J1' || tolClass === 'E1' || tolClass === 'N1') {
-                         // Generic base-metal Class 1
-                         tolerance = Math.max(1.5, 0.004 * t);
-                         formula = '±1.5°C or ±0.004|t| (greater)  [Base metal Class 1]';
-                     } else if (tolClass === 'K2' || tolClass === 'J2' || tolClass === 'E2' || tolClass === 'N2') {
-                         // Generic base-metal Class 2
-                         tolerance = Math.max(2.5, 0.0075 * t);
-                         formula = '±2.5°C or ±0.0075|t| (greater)  [Base metal Class 2]';
-                     }
+                 if (tolClass === 'T1') {
+                     // Type T Class 1: ±0.5°C or ±0.004|t| (IEC 60584-1 Table 12)
+                     tolerance = Math.max(0.5, 0.004 * t);
+                     formula = '±0.5°C or ±0.004|t| (greater) [Type T Class 1, IEC 60584-1]';
+                 } else if (tolClass === 'T2') {
+                     // Type T Class 2: ±1.0°C or ±0.0075|t| (IEC 60584-1 Table 12)
+                     tolerance = Math.max(1.0, 0.0075 * t);
+                     formula = '±1.0°C or ±0.0075|t| (greater) [Type T Class 2, IEC 60584-1]';
+                 } else if (tolClass === 'K1' || tolClass === 'J1' || tolClass === 'E1' || tolClass === 'N1') {
+                     // Generic base-metal Class 1
+                     tolerance = Math.max(1.5, 0.004 * t);
+                     formula = '±1.5°C or ±0.004|t| (greater) [Base metal Class 1]';
+                 } else if (tolClass === 'K2' || tolClass === 'J2' || tolClass === 'E2' || tolClass === 'N2') {
+                     // Generic base-metal Class 2
+                     tolerance = Math.max(2.5, 0.0075 * t);
+                     formula = '±2.5°C or ±0.0075|t| (greater) [Base metal Class 2]';
                  }
-         
              }
          
              document.getElementById('tolResult').innerHTML = `
